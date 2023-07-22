@@ -1,0 +1,21 @@
+name: ci
+
+on:
+  push:
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  actions: read
+  security-events: write
+
+jobs:
+  build:
+    uses: SlashNephy/.github/.github/workflows/docker-build.yml@master
+    with:
+      image-name: ghcr.io/vivid-lapin/ffmpeg-whip
+      image-platforms: amd64,arm64v8
+      scan-image: false
+      context: .
