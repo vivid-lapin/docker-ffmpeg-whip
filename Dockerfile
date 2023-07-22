@@ -45,7 +45,7 @@ COPY ./configure.patch /tmp
 
 ADD https://api.github.com/repos/winlinvip/ffmpeg-webrtc/git/refs/heads/feature/rtc-muxer /tmp/git.json
 RUN apt update \
-    && apt install -y --no-install-recommends git build-essential ca-certificates expat libgomp1 \
+    && apt install -y --no-install-recommends git vim ca-certificates expat libgomp1 \
     && git clone --recursive --depth 1 -b feature/rtc-muxer https://github.com/winlinvip/ffmpeg-webrtc /build \
     && cd /build \
     && git apply --numstat --summary --check --apply --ignore-whitespace -v /tmp/configure.patch
