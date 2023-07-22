@@ -15,7 +15,7 @@ jobs:
   build:
     uses: SlashNephy/.github/.github/workflows/docker-build.yml@master
     with:
-      image-name: ghcr.io/vivid-lapin/ffmpeg-whip:latest
+      image-name: ghcr.io/vivid-lapin/ffmpeg-whip
       image-platforms: linux/amd64,linux/arm64/v8
       scan-image: false
       context: .
