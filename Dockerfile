@@ -117,6 +117,6 @@ RUN \
 RUN ./configure --enable-muxer=whip --enable-openssl --enable-version3 \
     --enable-libx264 --enable-gpl --enable-libopus --enable-nonfree && make -j10
 
-RUN make install && rm /build
+RUN make install && rm -rf /build
 
 WORKDIR /
