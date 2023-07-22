@@ -1,0 +1,17 @@
+diff --git a/configure b/configure
+index e0fb881..75df455 100755
+--- a/configure
++++ b/configure
+@@ -6907,9 +6907,9 @@ enabled vapoursynth       && require_pkg_config vapoursynth "vapoursynth-script
+ 
+ enabled openssl            && {
+     enabled whip_muxer && {
+-        $pkg_config --exists --print-errors "openssl >= 1.0.1k" ||
+-        require_pkg_config openssl "openssl >= 1.0.1k" openssl/ssl.h SSL_library_init ||
+-        require_pkg_config openssl "openssl >= 1.0.1k" openssl/ssl.h OPENSSL_init_ssl
++        true # $pkg_config --exists --print-errors "openssl >= 1.0.1k" ||
++        # require_pkg_config openssl "openssl >= 1.0.1k" openssl/ssl.h SSL_library_init ||
++        # require_pkg_config openssl "openssl >= 1.0.1k" openssl/ssl.h OPENSSL_init_ssl
+     }
+ }
+ 

@@ -41,10 +41,14 @@ ENV FFMPEG_VERSION=5.1.3 \
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+COPY ./configure.patch /tmp
+
 ADD https://api.github.com/repos/winlinvip/ffmpeg-webrtc/git/refs/heads/feature/rtc-muxer /tmp/git.json
 RUN apt update \
     && apt install -y --no-install-recommends git build-essential ca-certificates expat libgomp1 \
-    && git clone --recursive --depth 1 -b feature/rtc-muxer https://github.com/winlinvip/ffmpeg-webrtc /build
+    && git clone --recursive --depth 1 -b feature/rtc-muxer https://github.com/winlinvip/ffmpeg-webrtc /build \
+    && cd /build \
+    && git apply --numstat --summary --check --apply --ignore-whitespace -v /tmp/configure.patch
 
 RUN buildDeps="autoconf \
     automake \
@@ -110,7 +114,9 @@ RUN \
     make install && \
     rm -rf ${DIR}
 
-RUN ./configure --enable-muxer=whip --enable-version3 \
-    --enable-libx264 --enable-gpl --enable-libopus && make -j10
+RUN ./configure --enable-muxer=whip --enable-openssl --enable-version3 \
+    --enable-libx264 --enable-gpl --enable-libopus --enable-nonfree && make -j10
 
-RUN make install
+RUN make install && rm /build
+
+WORKDIR /
