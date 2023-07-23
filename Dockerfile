@@ -2,6 +2,8 @@
 
 FROM ubuntu:20.04 AS base
 
+FROM base as build
+
 ENV FFMPEG_VERSION=5.1.3 \
     AOM_VERSION=v1.0.0 \
     CHROMAPRINT_VERSION=1.5.0 \
@@ -88,6 +90,12 @@ ARG         LIBBLURAY_SHA256SUM="a3dd452239b100dc9da0d01b30e1692693e2a332a7d2991
 ARG         LIBZMQ_SHA256SUM="02ecc88466ae38cf2c8d79f09cfd2675ba299a439680b64ade733e26a349edeb v4.3.2.tar.gz"
 ARG         LIBARIBB24_SHA256SUM="f61560738926e57f9173510389634d8c06cabedfa857db4b28fb7704707ff128 v1.0.3.tar.gz"
 
+ARG         LD_LIBRARY_PATH=/opt/ffmpeg/lib
+ARG         MAKEFLAGS="-j2"
+ARG         PKG_CONFIG_PATH="/opt/ffmpeg/share/pkgconfig:/opt/ffmpeg/lib/pkgconfig:/opt/ffmpeg/lib64/pkgconfig"
+ARG         PREFIX=/opt/ffmpeg
+ARG         LD_LIBRARY_PATH="/opt/ffmpeg/lib:/opt/ffmpeg/lib64"
+
 ### libopus https://www.opus-codec.org/
 RUN \
     DIR=/tmp/opus && \
@@ -114,8 +122,11 @@ RUN \
     make install && \
     rm -rf ${DIR}
 
-RUN ./configure --enable-muxer=whip --enable-openssl --enable-version3 \
-    --enable-libx264 --enable-gpl --enable-libopus --enable-nonfree && make -j10 && make install
+RUN DIR=/tmp/ffmpeg ./configure --enable-muxer=whip --enable-openssl --enable-version3 \
+    --enable-libx264 --enable-gpl --enable-libopus --enable-nonfree \
+    --extra-cflags="-I${PREFIX}/include" --extra-ldflags="-L${PREFIX}/lib" --extra-libs=-ldl --prefix="${PREFIX}"  \
+    && make -j10 \
+    && make install
 
 ## cleanup
 RUN \
