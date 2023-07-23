@@ -115,8 +115,28 @@ RUN \
     rm -rf ${DIR}
 
 RUN ./configure --enable-muxer=whip --enable-openssl --enable-version3 \
-    --enable-libx264 --enable-gpl --enable-libopus --enable-nonfree && make -j10
+    --enable-libx264 --enable-gpl --enable-libopus --enable-nonfree && make -j10 && make install
 
-RUN make install && rm -rf /build
+## cleanup
+RUN \
+    ldd ${PREFIX}/bin/ffmpeg | grep opt/ffmpeg | cut -d ' ' -f 3 | xargs -i cp {} /usr/local/lib/ && \
+    for lib in /usr/local/lib/*.so.*; do ln -s "${lib##*/}" "${lib%%.so.*}".so; done && \
+    cp ${PREFIX}/bin/* /usr/local/bin/ && \
+    cp -r ${PREFIX}/share/ffmpeg /usr/local/share/ && \
+    LD_LIBRARY_PATH=/usr/local/lib ffmpeg -buildconf && \
+    cp -r ${PREFIX}/include/libav* ${PREFIX}/include/libpostproc ${PREFIX}/include/libsw* /usr/local/include && \
+    mkdir -p /usr/local/lib/pkgconfig && \
+    for pc in ${PREFIX}/lib/pkgconfig/libav*.pc ${PREFIX}/lib/pkgconfig/libpostproc.pc ${PREFIX}/lib/pkgconfig/libsw*.pc; do \
+    sed "s:${PREFIX}:/usr/local:g" <"$pc" >/usr/local/lib/pkgconfig/"${pc##*/}"; \
+    done
 
-WORKDIR /
+FROM        base AS release
+LABEL       org.opencontainers.image.authors="7887955+ci7lus@users.noreply.github.com" \
+    org.opencontainers.image.source=https://github.com/vivid-lapin/docker-ffmpeg-whip
+
+ENV         LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64
+
+CMD         ["--help"]
+ENTRYPOINT  ["ffmpeg"]
+
+COPY --from=build /usr/local /usr/local/
